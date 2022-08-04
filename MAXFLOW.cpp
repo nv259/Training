@@ -1,85 +1,88 @@
 #include    <bits/stdc++.h>
 
 using namespace std;
-///////////////////////
-const   int N = 1e3+5,
-            M = 1e5+5;
+//////////////////////
 
-struct semgent{
-    int x, y, c, f;
-} e[2*M];
+const   int N = 1e4+5;
 
-int     m, n, s, t, trace[2*N], link[2*M], head[2*N], res;
+struct  edge{
+    int     x, y, c, f;
+}e[N];
+
+int     n, m, link[N], head[N], FlowValue, trace[N], delta, s, t;
 
 void    enter(){
-    int     u, v, c;
-    scanf("%d%d%d%d", &n, &m, &s, &t);
-    for (int i = 1; i <= m; i++)
+    int     x, y, c;
+
+    scanf("%d%d", &n, &m, &s, &t);
+    for (int i = 1; i <= m; i++) 
     {
-        scanf("%d%d%d", &u, &v, &c);
-        e[i].x = e[i+m].y = u;
-        e[i].y = e[i+m].x = v;
-        e[i].c = c; e[i+m].c = 0;
-        link[i] = head[u]; head[u] = i;
-        link[i+m] = head[v]; head[v] = i+m;
+        scanf("%d%d%d", &x, &y, &c);
+        e[i].x = e[i+m].y = x;
+        e[i].y = e[i+m].x = y;
+        link[i] = head[x];  head[x] = i;
+        link[i+m] = head[y];  head[y] = i+m;
     }
 }
 
-bool    findPath(){
-    memset(trace, 0, sizeof(trace));
-    trace[s] = 1;
+bool    find_path(){
+    for (int i = 1; i <= m; i++) trace[i] = 0;
     queue <int> Q;
+
+    trace[s] = 1;
     Q.push(s);
+
     while (!Q.empty())
     {
-        int     u = Q.front();
+        int u = Q.front();
         Q.pop();
-        int     i = head[u];
+
+        int i = head[u];
         while (i)
-        {
-            int     v = e[i].y;
-            if (trace[v] == 0 && e[i].f < e[i].c)
+        {   
+            int v = e[i].y;
+            if (!trace[v] && e[i].f < e[i].c)
             {
                 trace[v] = i;
                 if (v == t) return true;
                 Q.push(v);
-            }   
+            }
             i = link[i];
         }
     }
-    return false;
+    return false;   
 }
 
-void    increaseFlow(){
+void    AugmentFlow(){
     int     v = t, i;
-    int     delta = INFINITY;
-    while (v != s)
-    {
+    delta = INFINITY;
+
+    do{
         i = trace[v];
         delta = min(delta, e[i].c - e[i].f);
         v = e[i].x;
-    }
-     
+    } while (v != s);
+
     v = t;
-    while (v != s)
-    {
+    do{
         i = trace[v];
         e[i].f += delta;
         e[i+m].f -= delta;
         v = e[i].x;
-    }
-    res += delta;
+    } while (v != s);
+    FlowValue += delta;
+}
+
+void    print(){
+
 }
 
 int main(){
-    freopen("maxflow.inp","r",stdin);
-    freopen("maxflow.out","w",stdout);
-    //freopen("a.inp","r",stdin);
+    freopen("a.inp","r",stdin);
 
     enter();
-    while (findPath()) 
-        increaseFlow();
-    cout << res;
+    while (find_path()) AugmentFlow();
+    print();
 
     return 0;
 }
